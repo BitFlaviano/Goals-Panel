@@ -53,6 +53,17 @@ function getDefaultData() {
             { year: '2010', name: 'Hardware Profissional', source: 'Digital Treinamentos' },
             { year: '2009', name: 'Informática', source: 'C.E.I.' }
         ],
+        skillBars: [
+            { name: 'Python', percent: 45, icon: 'python' },
+            { name: 'Java', percent: 70, icon: 'java' },
+            { name: 'CSS', percent: 50, icon: 'css' },
+            { name: 'HTML', percent: 65, icon: 'html' },
+            { name: 'Power BI', percent: 30, icon: 'powerbi' },
+            { name: 'Análise de Dados', percent: 40, icon: 'analytics' },
+            { name: 'SQL Firebird', percent: 55, icon: 'database' },
+            { name: 'IA', percent: 60, icon: 'brain' },
+            { name: 'MongoDB', percent: 25, icon: 'mongodb' }
+        ],
         contacts: [
             {
                 id: 'wa',

@@ -70,6 +70,7 @@ function renderMainContent(data) {
     container.appendChild(createEducationSection(data));
     container.appendChild(createExperienceSection(data));
     container.appendChild(createSkillsSection(data));
+    container.appendChild(createSkillBarsSection(data));
 }
 
 function createSection(iconSvg, title) {
@@ -147,6 +148,42 @@ function createSkillsSection(data) {
         </div>`
     ).join('');
     sec.appendChild(grid);
+    return sec;
+}
+
+function createSkillBarsSection(data) {
+    const sec = createSection(
+        `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+        'Habilidades'
+    );
+    const wrapper = document.createElement('div');
+    wrapper.className = 'skill-bars';
+    data.skillBars.forEach(item => {
+        const bar = document.createElement('div');
+        bar.className = 'skill-bar-item';
+        bar.setAttribute('data-pct', item.percent);
+        bar.innerHTML = `
+            <div class="skill-bar-header">
+                <span class="skill-bar-icon">${ICONS[item.icon] || ICONS.globe}</span>
+                <span class="skill-bar-name">${esc(item.name)}</span>
+                <span class="skill-bar-pct">${item.percent}%</span>
+            </div>
+            <div class="skill-bar-track">
+                <div class="skill-bar-fill" style="width:0%"></div>
+            </div>`;
+        bar.addEventListener('mouseenter', () => {
+            const fill = bar.querySelector('.skill-bar-fill');
+            fill.style.transition = 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
+            fill.style.width = item.percent + '%';
+        });
+        bar.addEventListener('mouseleave', () => {
+            const fill = bar.querySelector('.skill-bar-fill');
+            fill.style.transition = 'width 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+            fill.style.width = '0%';
+        });
+        wrapper.appendChild(bar);
+    });
+    sec.appendChild(wrapper);
     return sec;
 }
 
