@@ -53,16 +53,41 @@ function getDefaultData() {
             { year: '2010', name: 'Hardware Profissional', source: 'Digital Treinamentos' },
             { year: '2009', name: 'Informática', source: 'C.E.I.' }
         ],
-        skillBars: [
-            { name: 'Python', percent: 45, icon: 'python' },
-            { name: 'Java', percent: 70, icon: 'java' },
-            { name: 'CSS', percent: 50, icon: 'css' },
-            { name: 'HTML', percent: 65, icon: 'html' },
-            { name: 'Power BI', percent: 30, icon: 'powerbi' },
-            { name: 'Análise de Dados', percent: 40, icon: 'analytics' },
-            { name: 'SQL Firebird', percent: 55, icon: 'database' },
-            { name: 'IA', percent: 60, icon: 'brain' },
-            { name: 'MongoDB', percent: 25, icon: 'mongodb' }
+        habilities: [
+            { name: 'Python', level: 65, icon: 'python' },
+            { name: 'Microsoft Power BI (Power BI)', level: 85, icon: 'powerbi' },
+            { name: 'SQL', level: 80, icon: 'postgresql' },
+            { name: 'Microsoft Fabric (Fabric)', level: 30, icon: 'fabric' },
+            { name: 'Excel', level: 90, icon: 'microsoftexcel' },
+            { name: 'VBA', level: 75, icon: 'microsoft' },
+            { name: 'JavaScript', level: 50, icon: 'javascript' },
+            { name: 'TypeScript', level: 30, icon: 'typescript' },
+            { name: 'Java', level: 30, icon: 'java' },
+            { name: 'C#', level: 20, icon: 'csharp' },
+            { name: 'HTML5', level: 55, icon: 'html5' },
+            { name: 'CSS3', level: 50, icon: 'css3' },
+            { name: 'Node.js', level: 35, icon: 'nodedotjs' },
+            { name: 'React', level: 25, icon: 'react' },
+            { name: 'Next.js', level: 20, icon: 'nextdotjs' },
+            { name: 'Tailwind CSS', level: 40, icon: 'tailwindcss' },
+            { name: 'Git', level: 60, icon: 'git' },
+            { name: 'Docker', level: 30, icon: 'docker' },
+            { name: 'PostgreSQL', level: 55, icon: 'postgresql' },
+            { name: 'MySQL', level: 50, icon: 'mysql' },
+            { name: 'MongoDB', level: 25, icon: 'mongodb' },
+            { name: 'Pandas', level: 45, icon: 'pandas' },
+            { name: 'Linux', level: 40, icon: 'linux' },
+            { name: 'AWS', level: 25, icon: 'amazonaws' },
+            { name: 'Azure', level: 35, icon: 'microsoftazure' },
+            { name: 'Apache Spark', level: 20, icon: 'apachespark' },
+            { name: 'Airflow', level: 15, icon: 'apacheairflow' },
+            { name: 'PyTorch', level: 15, icon: 'pytorch' },
+            { name: 'dbt', level: 20, icon: 'dbt' },
+            { name: 'Terraform', level: 10, icon: 'terraform' },
+            { name: 'Kubernetes', level: 10, icon: 'kubernetes' },
+            { name: 'Redis', level: 15, icon: 'redis' },
+            { name: 'Tableau', level: 20, icon: 'tableau' },
+            { name: 'GraphQL', level: 10, icon: 'graphql' }
         ],
         contacts: [
             {
@@ -83,12 +108,26 @@ function getDefaultData() {
                 url: 'https://github.com/BitFlaviano',
                 icon: 'github'
             }
-        ]
+        ],
+        backgroundModel: 'random',
+        backgroundSettings: {
+            model3Speed: 8,
+            model4Altura: 65,
+            model4Tilt: 40,
+            model4Zoom: 45,
+            model4Lr: -100
+        }
     };
 }
 
 const DATA_KEY = 'portfolioData';
 let cachedData = null;
+
+const ICON_FALLBACKS = {
+    microsoftfabric: 'fabric',
+};
+
+
 
 function loadData() {
     if (cachedData) return cachedData;
@@ -96,12 +135,28 @@ function loadData() {
     if (raw) {
         try {
             cachedData = JSON.parse(raw);
+            if (migrateIcons(cachedData)) {
+                localStorage.setItem(DATA_KEY, JSON.stringify(cachedData));
+            }
             return cachedData;
         } catch (e) { /* fallback */ }
     }
     cachedData = getDefaultData();
+    migrateIcons(cachedData);
     saveDataLocal(cachedData);
     return cachedData;
+}
+
+function migrateIcons(data) {
+    if (!data.habilities) return false;
+    let changed = false;
+    data.habilities.forEach(h => {
+        if (h.icon && ICON_FALLBACKS[h.icon]) {
+            h.icon = ICON_FALLBACKS[h.icon];
+            changed = true;
+        }
+    });
+    return changed;
 }
 
 function saveDataLocal(data) {

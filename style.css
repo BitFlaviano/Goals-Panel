@@ -97,7 +97,6 @@ body {
     text-align: center;
     padding: 2rem;
     position: relative;
-    overflow: hidden;
 }
 
 .hero::before {
@@ -570,56 +569,84 @@ body {
     margin-left: auto;
 }
 
-.skill-bars {
+.habilities-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1rem;
 }
 
-.skill-bar-item {
+.hability-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    padding: 1rem 1.2rem;
-    cursor: pointer;
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
     transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.skill-bar-item:hover {
+.hability-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--gradient-1);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+}
+
+.hability-card:hover::before {
+    transform: scaleX(1);
+}
+
+.hability-card:hover {
     border-color: var(--accent);
-    box-shadow: 0 4px 15px var(--accent-glow);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px var(--accent-glow);
 }
 
-.skill-bar-header {
+.hability-header {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.75rem;
 }
 
-.skill-bar-icon {
-    display: flex;
-    align-items: center;
+.hability-icon {
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+    background: #6c5ce7;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    opacity: 0.9;
+    transition: opacity 0.3s;
 }
 
-.skill-bar-name {
-    flex: 1;
-    font-size: 0.9rem;
-    font-weight: 500;
+.hability-card:hover .hability-icon {
+    opacity: 1;
 }
 
-.skill-bar-pct {
-    font-size: 0.8rem;
-    font-weight: 700;
+.hability-name {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.hability-level {
     color: var(--accent-light);
-    font-variant-numeric: tabular-nums;
+    font-size: 0.85rem;
+    font-weight: 700;
 }
 
-.skill-bar-track {
+.hability-bar {
     width: 100%;
     height: 8px;
     background: var(--bg-primary);
@@ -627,12 +654,17 @@ body {
     overflow: hidden;
 }
 
-.skill-bar-fill {
+.hability-bar-fill {
     height: 100%;
-    background: var(--gradient-1);
     border-radius: 4px;
+    background: var(--gradient-1);
     width: 0%;
-    transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.hability-card:hover .hability-bar-fill {
+    width: var(--target);
 }
 
 footer {

@@ -1,16 +1,21 @@
-let typingInterval = null;
+let typingTimeout = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
-    await initSupabaseData();
+document.addEventListener('DOMContentLoaded', () => {
+    initSupabaseData().then(() => renderPortfolio()).catch(() => renderPortfolio());
     renderPortfolio();
     initThemeToggle();
     initScrollReveal();
-    initParticles();
     initSmoothScroll();
 });
 
 function renderPortfolio() {
     const data = loadData();
+
+    const model = data.backgroundModel || 'random';
+    const models = model === 'random' ? String(Math.floor(Math.random() * 6) + 1) : model;
+    initBackground(models, data.backgroundSettings || {});
+    if (model === 'random') startAutoSwitch(data.backgroundSettings || {});
+
     const p = data.personal;
 
     document.getElementById('displayName').textContent = p.name;
@@ -21,9 +26,9 @@ function renderPortfolio() {
     renderFooterLinks(data);
     renderMainContent(data);
 
-    if (typingInterval) {
-        clearInterval(typingInterval);
-        typingInterval = null;
+    if (typingTimeout) {
+        clearTimeout(typingTimeout);
+        typingTimeout = null;
     }
     initTypingEffect();
     initScrollReveal();
@@ -70,12 +75,14 @@ function renderMainContent(data) {
     container.appendChild(createEducationSection(data));
     container.appendChild(createExperienceSection(data));
     container.appendChild(createSkillsSection(data));
-    container.appendChild(createSkillBarsSection(data));
+    const habSection = createHabilitiesSection(data);
+    if (habSection) container.appendChild(habSection);
 }
 
 function createSection(iconSvg, title) {
     const section = document.createElement('div');
     section.className = 'section';
+    section.classList.add('visible');
     section.innerHTML = `
         <div class="section-header">
             <div class="icon">${iconSvg}</div>
@@ -134,7 +141,7 @@ function createExperienceSection(data) {
 
 function createSkillsSection(data) {
     const sec = createSection(
-        `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+        `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><polyline points="9 11 12 14 15 9"/><path d="M8 21l1-2 3 2 3-2 1 2"/></svg>`,
         'Qualificações Profissionais'
     );
     const grid = document.createElement('div');
@@ -151,39 +158,40 @@ function createSkillsSection(data) {
     return sec;
 }
 
-function createSkillBarsSection(data) {
+const LOCAL_ICONS = ['fabric','fabriccolor','microsoftfabric'];
+
+function iconUrl(slug) {
+    return LOCAL_ICONS.includes(slug)
+        ? '/' + slug + '.svg'
+        : 'https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/' + slug + '.svg';
+}
+
+function createHabilitiesSection(data) {
+    const habs = data.habilities || [];
+    if (!habs.length) return null;
     const sec = createSection(
-        `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+        `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
         'Habilidades'
     );
-    const wrapper = document.createElement('div');
-    wrapper.className = 'skill-bars';
-    data.skillBars.forEach(item => {
-        const bar = document.createElement('div');
-        bar.className = 'skill-bar-item';
-        bar.setAttribute('data-pct', item.percent);
-        bar.innerHTML = `
-            <div class="skill-bar-header">
-                <span class="skill-bar-icon">${ICONS[item.icon] || ICONS.globe}</span>
-                <span class="skill-bar-name">${esc(item.name)}</span>
-                <span class="skill-bar-pct">${item.percent}%</span>
+    const grid = document.createElement('div');
+    grid.className = 'habilities-grid';
+    grid.innerHTML = habs.map(item => {
+        const iconSlug = item.icon || '';
+        const iconHtml = iconSlug
+            ? `<div class="hability-icon" style="mask-image:url('${iconUrl(escAttr(iconSlug))}');-webkit-mask-image:url('${iconUrl(escAttr(iconSlug))}')"></div>`
+            : '';
+        return `<div class="hability-card">
+            <div class="hability-header">
+                ${iconHtml}
+                <span class="hability-name">${esc(item.name || '')}</span>
+                <span class="hability-level">${item.level || 0}%</span>
             </div>
-            <div class="skill-bar-track">
-                <div class="skill-bar-fill" style="width:0%"></div>
-            </div>`;
-        bar.addEventListener('mouseenter', () => {
-            const fill = bar.querySelector('.skill-bar-fill');
-            fill.style.transition = 'width 0.8s cubic-bezier(0.22, 1, 0.36, 1)';
-            fill.style.width = item.percent + '%';
-        });
-        bar.addEventListener('mouseleave', () => {
-            const fill = bar.querySelector('.skill-bar-fill');
-            fill.style.transition = 'width 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
-            fill.style.width = '0%';
-        });
-        wrapper.appendChild(bar);
-    });
-    sec.appendChild(wrapper);
+            <div class="hability-bar">
+                <div class="hability-bar-fill" style="--target:${item.level || 0}%"></div>
+            </div>
+        </div>`;
+    }).join('');
+    sec.appendChild(grid);
     return sec;
 }
 
@@ -239,9 +247,10 @@ function initTypingEffect() {
             charIndex++;
             if (charIndex === current.length) {
                 isWaiting = true;
-                setTimeout(() => { isWaiting = false; isDeleting = true; }, 2000);
+                typingTimeout = setTimeout(() => { isWaiting = false; isDeleting = true; type(); }, 2000);
+                return;
             }
-            setTimeout(type, 60);
+            typingTimeout = setTimeout(type, 60);
         } else if (isDeleting) {
             el.textContent = current.substring(0, charIndex);
             charIndex--;
@@ -250,9 +259,9 @@ function initTypingEffect() {
                 charIndex = 0;
                 phraseIndex = (phraseIndex + 1) % phrases.length;
             }
-            setTimeout(type, 30);
+            typingTimeout = setTimeout(type, 30);
         } else {
-            setTimeout(type, 100);
+            typingTimeout = setTimeout(type, 100);
         }
     }
     type();
