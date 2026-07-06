@@ -379,20 +379,23 @@ body {
 
 .timeline-item {
     position: relative;
-    padding: 1.2rem 0 1.2rem 1.5rem;
-    border-bottom: 1px solid var(--border);
     transition: all 0.3s ease;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.8rem;
+    padding: 1rem 1.2rem 1rem 2.2rem;
 }
 
 .timeline-item:last-child {
-    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .timeline-item::before {
     content: '';
     position: absolute;
     left: -2rem;
-    top: 1.6rem;
+    top: 1.35rem;
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -408,7 +411,9 @@ body {
 }
 
 .timeline-item:hover {
-    padding-left: 2rem;
+    border-color: var(--accent);
+    transform: translateX(4px);
+    box-shadow: 0 4px 15px var(--accent-glow);
 }
 
 .timeline-item .year {
